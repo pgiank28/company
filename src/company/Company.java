@@ -17,12 +17,9 @@ import java.text.SimpleDateFormat;
 
 public class Company {
 
-    /**
-     * @param args the command line arguments
-     
-    */
-    ArrayList<Employee> internals;
-    ArrayList<Employee> externals;
+    
+    static ArrayList<Employee> internals;
+    static ArrayList<Employee> externals;
     
     public static void main(String[] args) {
         
@@ -51,14 +48,15 @@ public class Company {
         
             //Operation 2.Print in descending order of total cost
         System.out.println("Internal employees ranking:");
-        for(employeesWithTotalCosts e:s.ranking(EmployeeType.I)){
-            System.out.println("Employee ID: "+e.getId()+"  Cost:"+e.getCost());
-        }
+        internals.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
+        Collections.reverse(internals);
+        internals.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
         
         System.out.println("External employees ranking:");
-        for(employeesWithTotalCosts e:s.ranking(EmployeeType.O)){
-            System.out.println("Employee ID: "+e.getId()+"  Cost:"+e.getCost());
-        }
+        externals.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
+        Collections.reverse(externals);
+        externals.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
+        
     }
     
     public void storeNewEmployee(String inputLine){
@@ -103,61 +101,4 @@ public class Company {
         return;
     }
     
-    public ArrayList<employeesWithTotalCosts> ranking(EmployeeType type){
-        ArrayList<employeesWithTotalCosts> emp=new ArrayList<employeesWithTotalCosts>();
-        if(type==EmployeeType.I){
-            for(Employee e:internals){
-                int i=0;
-                for(employeesWithTotalCosts ecost:emp){
-                    if(ecost.getId().equals(e.getId())){
-                        ecost.addCost(e.cost());
-                        emp.set(i,ecost);
-                        System.out.println(i);
-                        break;
-                    }
-                    i++;
-                }
-                emp.add(new employeesWithTotalCosts(e.getId(),e.cost()));
-            }
-            
-        }
-        else{
-                for(Employee e:externals){
-                for(employeesWithTotalCosts ecost:emp){
-                    if(ecost.getId().equals(e.getId())){
-                        ecost.addCost(e.cost());
-                        continue;
-                    }
-                }
-                emp.add(new employeesWithTotalCosts(e.getId(),e.cost()));
-            }    
-        }
-        Collections.sort(emp);
-        return emp;
-    }
-    
-    private class employeesWithTotalCosts implements Comparable<employeesWithTotalCosts>{
-        private String id;
-        private double cost;
-        
-        private employeesWithTotalCosts(String id,double cost){
-            this.id=id;
-            this.cost=cost;
-        }
-        
-        private void addCost(double cost){
-            this.cost=this.cost+cost;
-        }
-        private double getCost(){
-            return this.cost;
-        }
-        private String getId(){
-            return id;
-        }
-        
-        public int compareTo(employeesWithTotalCosts e){
-            //Sorting in descending order
-            return this.cost>e.cost?-1:1;
-        }
-    }
 }
