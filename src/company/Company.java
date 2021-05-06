@@ -15,14 +15,16 @@ import java.text.SimpleDateFormat;
 public class Company {
 
     private static Logger LOGGER = Logger.getLogger("MyLogger");
-    static ArrayList<Employee> internals;
-    static ArrayList<Employee> externals;
+    private static ArrayList<Employee> internals;
+    private static ArrayList<Employee> externals;
+    private static EmployeeFactory factory;
     
     public static void main(String[] args) {
         
        //Prepare the company object
        Company s=new Company();
        s.initEmployeeArrays();
+       s.initEmployeeFactory();
        
         //Reading input from file
        try {
@@ -51,26 +53,27 @@ public class Company {
     public void storeNewEmployee(String inputLine){
         String[] tokens=inputLine.split("\\t");
         String type=tokens[1];
+        
         try{
+            Employee e=factory.getEmployee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]),type);
             if(type.equalsIgnoreCase("I")){
-                Employee e=new InternalEmployee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]));
                 internals.add(e);
             }else{
-                if(type.equalsIgnoreCase("0")){
-                    Employee e=new ExternalEmployee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]));
-                    externals.add(e);
-                }else{
-                    LOGGER.log(Level.WARNING,"Not supported employee type at line : "+inputLine);
-                }
+                externals.add(e);
             }
         }catch(ParseException e){
             LOGGER.log(Level.WARNING,"Parsing not implemented for the line :"+inputLine);
+        }catch(NullPointerException e2){
+            LOGGER.log(Level.WARNING,e2.getMessage());
         }
     }
     
     public void initEmployeeArrays(){
-        this.internals=new ArrayList<Employee>();
-        this.externals=new ArrayList<Employee>();
+        internals = new ArrayList<Employee>();
+        externals = new ArrayList<Employee>();
+    }
+    public void initEmployeeFactory(){
+        factory = new EmployeeFactory();
     }
     
     public void ranking(ArrayList<Employee> emp,String type){
