@@ -1,23 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package company;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Collections;
+import java.util.logging.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Scanner;
 import java.text.SimpleDateFormat;  
 
 public class Company {
 
-    
+    private static Logger LOGGER = Logger.getLogger("MyLogger");
     static ArrayList<Employee> internals;
     static ArrayList<Employee> externals;
     
@@ -36,9 +34,8 @@ public class Company {
                 s.storeNewEmployee(data);
             }
             myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+        } catch (FileNotFoundException e){
+            LOGGER.log(Level.SEVERE,e.getMessage());
             return;
         }
             
@@ -47,15 +44,8 @@ public class Company {
         s.totalCostPerDay(new GregorianCalendar(2017,Calendar.MAY,21).getTime(),EmployeeType.O);
         
             //Operation 2.Print in descending order of total cost
-        System.out.println("Internal employees ranking:");
-        internals.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
-        Collections.reverse(internals);
-        internals.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
-        
-        System.out.println("External employees ranking:");
-        externals.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
-        Collections.reverse(externals);
-        externals.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
+        s.ranking(internals,EmployeeType.I);
+        s.ranking(externals, EmployeeType.O);
         
     }
     
@@ -81,6 +71,24 @@ public class Company {
         this.externals=new ArrayList<Employee>();
     }
     
+    public void ranking(ArrayList<Employee> emp,EmployeeType type){
+        if(type==EmployeeType.I){
+            ArrayList<Employee> inters = new ArrayList(emp);
+            System.out.println("Internal employees ranking:");
+            inters.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
+            Collections.reverse(inters);
+            inters.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
+        
+        }else{
+            ArrayList<Employee> exters = new ArrayList(emp);
+            System.out.println("External employees ranking:");
+            exters.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
+            Collections.reverse(exters);
+            exters.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
+        
+        }
+    }
+    
     public void totalCostPerDay(Date d,EmployeeType type){
         double cost=0;
         if(type==EmployeeType.I){
@@ -98,7 +106,6 @@ public class Company {
             }
             System.out.println("Total cost of day "+d+" for external employees:"+cost);
         }
-        return;
     }
     
 }
