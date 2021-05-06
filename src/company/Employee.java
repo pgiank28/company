@@ -6,25 +6,20 @@
 package company;
 import java.util.Date;
 
-enum EmployeeType{
-    I,O
-}
 
-public class Employee{
+public abstract class Employee{
     private String id;
     private Date date;
     private double hours;
     private double hourly_rate;
     private double fixed_cost;
-    private EmployeeType type;
     
-    public Employee(String id,Date d,double hours,double hourly_rate,double fixed_cost,EmployeeType type){
+    public Employee(String id,Date d,double hours,double hourly_rate,double fixed_cost){
         this.id=id;
         this.date=d;
         this.hours=hours;
         this.hourly_rate=hourly_rate;
         this.fixed_cost=fixed_cost;
-        this.type=type;
     }
     
     public double cost(){

@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.logging.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Scanner;
 import java.text.SimpleDateFormat;  
@@ -40,29 +39,32 @@ public class Company {
         }
             
             //Operation 1.Print costs of a given day
-        s.totalCostPerDay(new GregorianCalendar(2017,Calendar.MAY,22).getTime(),EmployeeType.I);
-        s.totalCostPerDay(new GregorianCalendar(2017,Calendar.MAY,21).getTime(),EmployeeType.O);
+        s.totalCostPerDay(new GregorianCalendar(2017,Calendar.MAY,22).getTime(),new ArrayList(internals),"internal");
+        s.totalCostPerDay(new GregorianCalendar(2017,Calendar.MAY,21).getTime(),new ArrayList(externals),"external");
         
             //Operation 2.Print in descending order of total cost
-        s.ranking(internals,EmployeeType.I);
-        s.ranking(externals, EmployeeType.O);
+        s.ranking(new ArrayList(internals),"internals");
+        s.ranking(new ArrayList(externals),"externals");
         
     }
     
     public void storeNewEmployee(String inputLine){
         String[] tokens=inputLine.split("\\t");
-        EmployeeType type=tokens[1].equals("I")?EmployeeType.I:EmployeeType.O;
+        String type=tokens[1];
         try{
-            Employee e=new Employee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]),type);
-            //The employees are either internal or external employees.We store them to the corresponding arraylist
-            if(type==EmployeeType.I){
-                this.internals.add(e);
+            if(type.equalsIgnoreCase("I")){
+                Employee e=new InternalEmployee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]));
+                internals.add(e);
             }else{
-                this.externals.add(e);
+                if(type.equalsIgnoreCase("0")){
+                    Employee e=new ExternalEmployee(tokens[0],new SimpleDateFormat("dd/MM/yyyy").parse(tokens[2]),Double.parseDouble(tokens[3]),Double.parseDouble(tokens[4]),Double.parseDouble(tokens[5]));
+                    externals.add(e);
+                }else{
+                    LOGGER.log(Level.WARNING,"Not supported employee type at line : "+inputLine);
+                }
             }
         }catch(ParseException e){
-            System.out.println("Parse error");
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING,"Parsing not implemented for the line :"+inputLine);
         }
     }
     
@@ -71,41 +73,22 @@ public class Company {
         this.externals=new ArrayList<Employee>();
     }
     
-    public void ranking(ArrayList<Employee> emp,EmployeeType type){
-        if(type==EmployeeType.I){
-            ArrayList<Employee> inters = new ArrayList(emp);
-            System.out.println("Internal employees ranking:");
-            inters.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
-            Collections.reverse(inters);
-            inters.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
-        
-        }else{
-            ArrayList<Employee> exters = new ArrayList(emp);
-            System.out.println("External employees ranking:");
-            exters.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
-            Collections.reverse(exters);
-            exters.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
-        
-        }
+    public void ranking(ArrayList<Employee> emp,String type){
+        System.out.println("Ranking of "+type+" employees");
+        emp.sort((e1,e2)->(int)(e1.cost()-e2.cost()));
+        Collections.reverse(emp);
+        emp.forEach(x->System.out.println(x.getId()+" with cost "+x.cost()));
     }
     
-    public void totalCostPerDay(Date d,EmployeeType type){
+    public void totalCostPerDay(Date d,ArrayList<Employee> emp,String type){
+        System.out.println("Total cost for the day:"+d.toString()+" of "+type+" employees");
         double cost=0;
-        if(type==EmployeeType.I){
-            for(Employee e:internals){
-                if(e.getDate().equals(d)){
-                    cost=cost+e.cost();
-                }
+        for(Employee e:emp){
+            if(e.getDate().equals(d)){
+                cost=cost+e.cost();
             }
-            System.out.println("Total cost of day "+d+" for internal employees:"+cost);
-        }else{
-            for(Employee e:externals){
-                if(e.getDate().equals(d)){
-                    cost=cost+e.cost();
-                }
-            }
-            System.out.println("Total cost of day "+d+" for external employees:"+cost);
         }
+        System.out.println(cost);
     }
     
 }
